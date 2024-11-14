@@ -42,7 +42,11 @@ func (dialector *Dialector) Create(db *gorm.DB) {
 		}
 
 		if !db.DryRun && db.Error == nil {
-			_, err := db.Statement.ConnPool.ExecContext(db.Statement.Context, db.Statement.SQL.String(), db.Statement.Vars...)
+			result, err := db.Statement.ConnPool.ExecContext(db.Statement.Context, db.Statement.SQL.String(), db.Statement.Vars...)
+
+			if db.Statement.Result != nil {
+				db.Statement.Result.Result = result
+			}
 			db.AddError(err)
 		}
 	}

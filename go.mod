@@ -2,13 +2,13 @@ module gorm.io/driver/clickhouse
 
 go 1.21
 
-toolchain go1.21.1
-
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.30.0
 	github.com/hashicorp/go-version v1.6.0
-	gorm.io/gorm v1.25.10
+	gorm.io/gorm v1.30.0
 )
+
+require golang.org/x/text v0.20.0 // indirect
 
 require (
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
