@@ -333,7 +333,10 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 
 		var rows *sql.Rows
 		if str, ok := TableColumnTypesSelect[value]; ok {
-			m.DB.Session(&gorm.Session{}).Raw(str).Scan(&rows)
+			rows, err = m.DB.Session(&gorm.Session{}).Raw(str).Rows()
+			if err != nil {
+				return err
+			}
 		} else {
 			rows, err = m.DB.Session(&gorm.Session{}).Table(stmt.Table).Select(selectSql).Limit(1).Rows()
 			if err != nil {
