@@ -327,19 +327,20 @@ func (m Migrator) HasColumn(value interface{}, field string) bool {
 func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(value, func(stmt *gorm.Statement) (err error) {
-		rows, err := m.DB.Session(&gorm.Session{}).Table(stmt.Table).Limit(1).Rows()
-		if err != nil {
-			return err
-		}
-
-		defer func() {
-			if err == nil {
-				err = rows.Close()
-			}
-		}()
-
 		var rawColumnTypes []*sql.ColumnType
-		rawColumnTypes, err = rows.ColumnTypes()
+
+		rows, err := m.DB.Session(&gorm.Session{}).Table(stmt.Table).Limit(1).Rows()
+		if err == nil {
+			defer func() {
+				if err == nil {
+					err = rows.Close()
+				}
+			}()
+
+			rawColumnTypes, err = rows.ColumnTypes()
+		} else {
+			fmt.Println(err.Error())
+		}
 
 		columnTypeSQL := "SELECT name, type, default_expression, comment, is_in_primary_key, character_octet_length, numeric_precision, numeric_precision_radix, numeric_scale, datetime_precision FROM system.columns WHERE database = ? AND table = ?"
 		if m.Dialector.DontSupportColumnPrecision {
