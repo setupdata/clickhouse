@@ -329,7 +329,7 @@ func (m Migrator) HasColumn(value interface{}, field string) bool {
 func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(value, func(stmt *gorm.Statement) (err error) {
-		var selectSql string
+		selectSql := "*"
 		if str, ok := TableColumnTypesSelect[value]; ok {
 			selectSql = str
 		}
