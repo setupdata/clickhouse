@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/go-version"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/migrator"
@@ -205,13 +204,9 @@ func (m Migrator) HasTable(value interface{}) bool {
 // version < 23.9 table_type Enum8('BASE TABLE' = 1, 'VIEW' = 2, 'FOREIGN TABLE' = 3, 'LOCAL TEMPORARY' = 4, 'SYSTEM VIEW' = 5)
 // version >= 23.9 table_type String
 func (m Migrator) GetTables() (tableList []string, err error) {
-	var dbversion *version.Version
-	if dbversion, err = version.NewVersion(m.Version); err == nil {
-		versionTableType, _ := version.NewConstraint(">= 23.9")
-		if versionTableType.Check(dbversion) {
-			err = m.DB.Raw("SELECT TABLE_NAME FROM information_schema.tables where table_schema=? and table_type ='BASE TABLE'", m.CurrentDatabase()).Scan(&tableList).Error
-			return
-		}
+	if m.Dialector.Config.InformationSchemaTablesTableTypeString {
+		err = m.DB.Raw("SELECT TABLE_NAME FROM information_schema.tables where table_schema=? and table_type ='BASE TABLE'", m.CurrentDatabase()).Scan(&tableList).Error
+		return
 	}
 
 	err = m.DB.Raw("SELECT TABLE_NAME FROM information_schema.tables where table_schema=? and table_type =1", m.CurrentDatabase()).Scan(&tableList).Error
