@@ -330,13 +330,15 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(value, func(stmt *gorm.Statement) (err error) {
 		selectSql := "*"
-		if str, ok := TableColumnTypesSelect[value]; ok {
-			selectSql = str
-		}
 
-		rows, err := m.DB.Session(&gorm.Session{}).Table(stmt.Table).Select(selectSql).Limit(1).Rows()
-		if err != nil {
-			return err
+		var rows *sql.Rows
+		if str, ok := TableColumnTypesSelect[value]; ok {
+			m.DB.Session(&gorm.Session{}).Raw(str).Scan(&rows)
+		} else {
+			rows, err = m.DB.Session(&gorm.Session{}).Table(stmt.Table).Select(selectSql).Limit(1).Rows()
+			if err != nil {
+				return err
+			}
 		}
 
 		defer func() {
