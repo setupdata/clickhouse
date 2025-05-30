@@ -340,6 +340,7 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 			rawColumnTypes, err = rows.ColumnTypes()
 		} else {
 			fmt.Println(err.Error())
+			err = nil
 		}
 
 		columnTypeSQL := "SELECT name, type, default_expression, comment, is_in_primary_key, character_octet_length, numeric_precision, numeric_precision_radix, numeric_scale, datetime_precision FROM system.columns WHERE database = ? AND table = ?"
